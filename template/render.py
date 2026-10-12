@@ -288,7 +288,8 @@ AR = "٠١٢٣٤٥٦٧٨٩"
 def timeline(ep):
     tl = [("intro", INTRO_D, None)]
     for i, it in enumerate(ep["items"]):
-        tl.append(("item", ITEM_D, (it, AR[i + 1])))
+        num = len(ep["items"]) - i if ep.get("countdown") else i + 1
+        tl.append(("item", ITEM_D, (it, AR[num])))
     tl.append(("outro", OUTRO_D, None))
     return tl
 
