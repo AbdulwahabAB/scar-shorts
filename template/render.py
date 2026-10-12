@@ -199,6 +199,12 @@ def load_item_images(ep):
         fn = (e.get("files") or {}).get(it.get("shot", "shot0"))
         shot = Image.open(os.path.join(ROOT, "assets", ep["slug"], fn)).convert("RGB") if fn else brand_panel
         _prep_item(it, shot)
+        clip = (e.get("files") or {}).get("clip")
+        if clip and not it.get("no_clip"):
+            d = tempfile.mkdtemp()
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-i", os.path.join(ROOT, "assets", ep["slug"], clip),
+                            "-vf", f"scale={PANEL_W}:{PANEL_H}", "-q:v", "3", os.path.join(d, "%04d.jpg")], check=True)
+            it["_clip"] = sorted(os.path.join(d, f) for f in os.listdir(d))
 
 def item_background(it, t, gt):
     base = background(gt)
@@ -211,8 +217,12 @@ def item_background(it, t, gt):
 PANEL_W, PANEL_H, PANEL_Y = 960, 430, 330
 def card_layer_img(it, num, t):
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
-    z = 1 + 0.07 * t / ITEM_D                         # slow ken-burns inside the panel
-    panel = rounded(cover(it["_shot"], PANEL_W, PANEL_H, z), 34)
+    if it.get("_clip"):                               # gameplay clip (muted) inside the panel
+        fr = it["_clip"][min(int(t * FPS), len(it["_clip"]) - 1)]
+        panel = rounded(Image.open(fr).convert("RGB"), 34)
+    else:
+        z = 1 + 0.07 * t / ITEM_D                     # slow ken-burns on the screenshot
+        panel = rounded(cover(it["_shot"], PANEL_W, PANEL_H, z), 34)
     lay.alpha_composite(panel, ((W - PANEL_W) // 2, PANEL_Y))
     d.rounded_rectangle([(W - PANEL_W) // 2, PANEL_Y, (W + PANEL_W) // 2, PANEL_Y + PANEL_H], 34,
                         outline=GOLD + (255,), width=5)
