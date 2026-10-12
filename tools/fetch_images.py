@@ -37,11 +37,23 @@ def movie_url(m):
     return None
 
 def cut_clip(url, dst, start, dur=6.5):
-    """Short, MUTED clip sized for the 960x430 card panel."""
+    """Short, MUTED clip sized for the 960x430 card panel. Tries a few strategies (HLS/DASH/MP4)."""
     vf = "scale=960:430:force_original_aspect_ratio=increase,crop=960:430,fps=30"
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-ss", str(start), "-i", url.split("?")[0] if "mp4" in url else url,
-           "-t", str(dur), "-an", "-vf", vf, "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p", dst]
-    subprocess.run(cmd, check=True, timeout=300)
+    enc = ["-t", str(dur), "-an", "-vf", vf, "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p", dst]
+    common = ["-protocol_whitelist", "file,http,https,tcp,tls,crypto", "-allowed_extensions", "ALL"]
+    tries = [
+        ["ffmpeg", "-y", "-loglevel", "warning"] + common + ["-ss", str(start), "-i", url] + enc,
+        ["ffmpeg", "-y", "-loglevel", "warning"] + common + ["-i", url, "-ss", str(start)] + enc,
+        ["ffmpeg", "-y", "-loglevel", "warning", "-i", url, "-ss", str(start)] + enc,
+    ]
+    print(f"    trailer url: {url[:160]}")
+    for i, cmd in enumerate(tries):
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=400)
+        size = os.path.getsize(dst) if os.path.exists(dst) else 0
+        print(f"    try {i}: rc={r.returncode} size={size} {r.stderr.strip()[-400:]}")
+        if r.returncode == 0 and size > 50_000:
+            return
+    raise RuntimeError("all clip strategies failed")
 
 def main(ep_path):
     ep = json.load(open(ep_path, encoding="utf-8"))
