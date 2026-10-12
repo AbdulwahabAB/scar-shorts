@@ -4,10 +4,10 @@
   "countdown": true,
   "intro": {
     "title": "أقوى ٥ ألعاب في أكتوبر",
-    "sub": "من ٥ إلى ١",
+    "sub": "من 5 إلى 1",
     "hook": [
       "أقوى ٥ ألعاب في أكتوبر",
-      "رتبناها لك من ٥ إلى ١!"
+      "رتبناها لك من 5 إلى 1!"
     ]
   },
   "items": [
@@ -32,7 +32,7 @@
         "من مطوري Ghostrunner",
         "متوفرة من أول يوم على Game Pass"
       ],
-      "price": "Game Pass",
+      "price": null,
       "plat": "PS5 • Xbox • PC",
       "steam": "Valor Mortis",
       "shot": "shot0",
@@ -72,7 +72,7 @@
         "أول Call of Duty على Switch 2",
         "رجعة طور DMZ للاستخراج"
       ],
-      "plat": "PS5 • Xbox • PC • Switch 2",
+      "plat": "PS5 • Xbox • Switch 2 • PC",
       "steam": "Call of Duty: Modern Warfare 4",
       "shot": "shot0",
       "clip_start": 15,

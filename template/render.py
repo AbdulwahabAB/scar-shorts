@@ -120,54 +120,124 @@ def sweep(canvas, p):
     d.polygon([(x, 0), (x + 160, 0), (x - 240, H), (x - 400, H)], fill=GOLD_HI + (110,))
     canvas.alpha_composite(g.filter(ImageFilter.GaussianBlur(30)))
 
-# ---------------------------------------------------------------- scenes
-def fit_font(text, max_w, size, weight=700, min_size=48):
-    d = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
-    while size > min_size and d.textlength(text, font=font(size, weight), direction="rtl") > max_w:
-        size -= 4
-    return font(size, weight)
+# ---------------------------------------------------------------- text: measure, fit, blend
+class TextOverflow(Exception):
+    """Raised when a piece of text cannot fit its box, even wrapped and at its minimum size."""
 
+_MEAS = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+
+def ink_w(text, f, direction="rtl"):
+    l, _, r, _ = _MEAS.textbbox((0, 0), text, font=f, direction=direction)
+    return r - l
+
+def _latin(tok):
+    return bool(tok) and all(ord(ch) < 0x0600 for ch in tok) and any(ch.isalpha() for ch in tok)
+
+def _split2(text, f, max_w, direction, sep, allow_name_break=True):
+    """Best balanced 2-line split on `sep` where both lines fit, else None.
+    Avoids breaking inside an English name ("Warrior | of Light") when another break works."""
+    parts = text.split(sep)
+    best = None
+    for k in range(1, len(parts)):
+        a, b = sep.join(parts[:k]), sep.join(parts[k:])
+        wa, wb = ink_w(a, f, direction), ink_w(b, f, direction)
+        if wa <= max_w and wb <= max_w:
+            inside_name = sep == " " and _latin(parts[k - 1]) and _latin(parts[k])
+            if inside_name and not allow_name_break: continue
+            score = (inside_name, max(wa, wb))
+            if best is None or score < best[0]:
+                best = (score, [a, b])
+    return best[1] if best else None
+
+def fit_text(text, max_w, start, min_size, weight=700, max_lines=1, wrap_below=None,
+             direction="rtl", sep=" ", where="text"):
+    """Return (font, lines). Order: one line down to `wrap_below`, then two lines down to
+    `min_size`, then one line down to `min_size`. Never drops text: raises TextOverflow."""
+    sizes = list(range(start, min_size - 1, -2))
+    floor1 = wrap_below if (max_lines > 1 and wrap_below) else min_size
+    for sz in sizes:
+        if sz >= floor1 and ink_w(text, font(sz, weight), direction) <= max_w:
+            return font(sz, weight), [text]
+    if max_lines >= 2:
+        for allow in (False, True):              # shrink before splitting an English name
+            for sz in sizes:
+                lines = _split2(text, font(sz, weight), max_w, direction, sep, allow)
+                if lines:
+                    return font(sz, weight), lines
+    for sz in sizes:
+        if sz < floor1 and ink_w(text, font(sz, weight), direction) <= max_w:
+            return font(sz, weight), [text]
+    w = ink_w(text, font(min_size, weight), direction)
+    raise TextOverflow(f'{where}: "{text}" is {w}px wide at the minimum {min_size}px font; the box is '
+                       f'{max_w}px' + (" (also tried 2 lines)" if max_lines > 1 else "") +
+                       ". Shorten the text.")
+
+_tiles = {}
+def text_tile(text, f, fill, direction="rtl"):
+    """Text drawn once at full opacity on its own transparent tile; offsets are from the 'mm' anchor."""
+    key = (text, f.size, f.getname(), id(f), fill, direction)
+    if key not in _tiles:
+        l, t, r, b = _MEAS.textbbox((0, 0), text, font=f, anchor="mm", direction=direction)
+        pad = 6
+        tile = Image.new("RGBA", (r - l + 2 * pad, b - t + 2 * pad), (0, 0, 0, 0))
+        ImageDraw.Draw(tile).text((-l + pad, -t + pad), text, font=f, fill=fill[:3] + (255,),
+                                  anchor="mm", direction=direction)
+        _tiles[key] = (tile, l - pad, t - pad)
+    return _tiles[key]
+
+def with_alpha(tile, alpha):
+    if alpha >= 255: return tile
+    t = tile.copy(); t.putalpha(t.getchannel("A").point(lambda v: v * alpha // 255)); return t
+
+def blend_on(canvas, tile, x, y, alpha=255):
+    """Alpha-composite (never pixel-replace) so faded text blends instead of punching holes."""
+    if alpha <= 0: return
+    canvas.alpha_composite(with_alpha(tile, alpha), (int(x), int(y)))
+
+def put_text(canvas, cx, cy, text, f, fill, alpha=255, direction="rtl"):
+    tile, ox, oy = text_tile(text, f, fill, direction)
+    blend_on(canvas, tile, cx + ox, cy + oy, alpha)
+
+def pill_tile(w, h, r, fill=None, outline=None, width=0, text=None, f=None, tcolor=None):
+    tile = Image.new("RGBA", (int(w), int(h)), (0, 0, 0, 0)); d = ImageDraw.Draw(tile)
+    d.rounded_rectangle([0, 0, w - 1, h - 1], r, fill=fill, outline=outline, width=width)
+    if text:
+        t, ox, oy = text_tile(text, f, tcolor)
+        tile.alpha_composite(t, (int(w / 2 + ox), int(h / 2 + oy)))
+    return tile
+
+# ---------------------------------------------------------------- data checks
+PLATFORMS = {"PS5", "PS4", "Xbox", "Switch 2", "Switch", "PC"}
+
+def check_platforms(it, where):
+    toks = [p.strip() for p in it["plat"].split("•")]
+    errs = [f'{where} plat: unknown platform "{p}" (allowed: {", ".join(sorted(PLATFORMS))})'
+            for p in toks if p not in PLATFORMS]
+    texts = " ".join([it.get("title", ""), it.get("info", "")] + list(it.get("bullets", [])))
+    if "Switch 2" in texts and "Switch 2" not in toks:
+        errs.append(f'{where}: text says "Switch 2" but platforms say {it["plat"]!r}')
+    if "Switch" in toks and "Switch 2" in texts:
+        errs.append(f'{where}: platforms list plain "Switch" while the text says "Switch 2"')
+    return errs
+
+# ---------------------------------------------------------------- scenes
 def scene_intro(c, t, ep):
     """Hook first (readable from frame 1), then a short logo slam."""
     hook = ep["intro"].get("hook") or [ep["intro"]["title"], ep["intro"]["sub"]]
     p = ease_out(t / 0.25)
     lay = Image.new("RGBA", c.size, (0, 0, 0, 0))
-    s1 = fit_font(hook[0], 960, int(104 * (0.9 + 0.1 * p)))
-    glow_text(lay, (W / 2, 640), hook[0], s1, GOLD_HI, r=16)
+    f1, _ = fit_text(hook[0], 960, 104, 56, where="intro hook[0]")
+    glow_text(lay, (W / 2, 640), hook[0], font(max(40, int(f1.size * (0.9 + 0.1 * p)))), GOLD_HI, r=16)
     if len(hook) > 1:
         q = ease_out((t - 0.35) / 0.35)
-        s2 = fit_font(hook[1], 960, 84, 700)
-        ImageDraw.Draw(lay).text((W / 2, 790 + (1 - q) * 40), hook[1], font=s2,
-                                 fill=WHITE + (int(255 * q),), anchor="mm", direction="rtl")
+        f2, _ = fit_text(hook[1], 960, 84, 48, where="intro hook[1]")
+        put_text(lay, W / 2, 790 + (1 - q) * 40, hook[1], f2, WHITE, int(255 * q))
     c.alpha_composite(lay)
     if t > 1.1:                                   # logo slam
         q = ease_out((t - 1.1) / 0.35)
         size = int(560 - 200 * q)
         paste_logo(c, size, W / 2, 1180, int(255 * q))
     sweep(c, (t - 1.1) / 0.8)
-
-def card_layer(it, num, t):
-    lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
-    cy = 560
-    d.rounded_rectangle([60, cy, W - 60, cy + 880], 46, fill=(8, 8, 8, 225), outline=GOLD + (255,), width=5)
-    d.rounded_rectangle([75, cy + 15, W - 75, cy + 865], 38, outline=(255, 255, 255, 25), width=2)
-    # number badge
-    d.ellipse([W / 2 - 95, cy - 95, W / 2 + 95, cy + 95], fill=GOLD + (255,), outline=BLACK + (255,), width=8)
-    d.text((W / 2, cy - 4), num, font=font(118), fill=BLACK, anchor="mm")
-    def fade(start):  # per-element alpha
-        return int(255 * ease_out((t - start) / 0.4))
-    a = fade(0.35)
-    d.rounded_rectangle([W / 2 - 280, cy + 140, W / 2 + 280, cy + 232], 46, fill=GOLD + (a,))
-    d.text((W / 2, cy + 184), it["tag"], font=font(52), fill=BLACK + (a,), anchor="mm", direction="rtl")
-    a = fade(0.6)
-    d.text((W / 2, cy + 345), it["title"], font=font(96), fill=WHITE + (a,), anchor="mm", direction="rtl")
-    d.line([W / 2 - 120, cy + 425, W / 2 + 120, cy + 425], fill=GOLD + (a,), width=4)
-    a = fade(0.9)
-    for i, ln in enumerate(it["body"]):
-        d.text((W / 2, cy + 515 + i * 92), ln, font=font(62, 500), fill=GRAY + (a,), anchor="mm", direction="rtl")
-    a = fade(1.3)
-    d.text((W / 2, cy + 790), it["plat"], font=font(50), fill=GOLD_HI + (a,), anchor="mm")
-    return lay
 
 def rounded(img, r):
     m = Image.new("L", img.size, 0)
@@ -185,6 +255,8 @@ def _prep_item(it, shot):
     bg = cover(shot, W, H, 1.0).filter(ImageFilter.GaussianBlur(28))
     it["_bg"] = Image.blend(bg, Image.new("RGB", (W, H), BLACK), 0.55)
 
+PANEL_W, PANEL_H, PANEL_Y = 960, 430, 330
+
 def load_item_images(ep):
     mpath = os.path.join(ROOT, "assets", ep["slug"], "manifest.json")
     man = json.load(open(mpath, encoding="utf-8")) if os.path.exists(mpath) else {}
@@ -194,6 +266,7 @@ def load_item_images(ep):
     for i, it in enumerate(ep["items"]):
         e = man.get(str(i)) or {}
         meta = e.get("meta") or {}
+        # "price" absent -> use the Steam (SA) price; "price": null or "" -> no badge.
         if "price" not in it and meta.get("price"):
             it["price"] = meta["price"].replace("SR", "ريال").strip()
         fn = (e.get("files") or {}).get(it.get("shot", "shot0"))
@@ -214,8 +287,73 @@ def item_background(it, t, gt):
     bg = cover(it["_bg"], W, H, z).convert("RGBA")
     return Image.blend(base, bg, max(0.0, min(1.0, k)))
 
-PANEL_W, PANEL_H, PANEL_Y = 960, 430, 330
+CARD_X0, CARD_X1 = 60, W - 60
+CARD_Y = PANEL_Y + PANEL_H + 35
+TEXT_W = 880                  # 40px padding each side of the 960px card
+BULLET_W = 800                # leaves room for the gold dot
+SAFE_BOTTOM = 1700            # keep the card above YouTube's caption/button overlay
+ENTER, EXIT = 0.35, 0.35      # card fades + drifts vertically; it never crosses a frame edge
+
+def layout_card(it, where):
+    """Lay out every text element of a card once, validating that all of it fits.
+    Returns {"h": card height, "els": [(tile, x, y, fade_start), ...]} with card-relative y."""
+    els = []
+    def add_text(text, f, fill, cy, start, direction="rtl"):
+        tile, ox, oy = text_tile(text, f, fill, direction)
+        els.append((tile, W / 2 + ox, cy + oy, start))
+    y = 36
+    f, (tag,) = fit_text(it["tag"], 760, 58, 44, where=f"{where} tag")
+    pw = max(600, ink_w(tag, f) + 90)
+    els.append((pill_tile(pw, 96, 48, fill=GOLD + (255,), text=tag, f=f, tcolor=BLACK), (W - pw) / 2, y, 0.35))
+    y += 96 + 26
+    f, lines = fit_text(it["title"], TEXT_W, 104, 52, max_lines=2, wrap_below=60, where=f"{where} title")
+    lh = int(f.size * 1.2)
+    for ln in lines:
+        add_text(ln, f, WHITE, y + lh / 2, 0.6); y += lh
+    if it.get("info"):
+        y += 6
+        f, (ln,) = fit_text(it["info"], TEXT_W, 40, 30, 500, where=f"{where} info")
+        add_text(ln, f, GRAY, y + 25, 0.6); y += 50
+    y += 16
+    els.append((pill_tile(240, 4, 0, fill=GOLD + (255,)), W / 2 - 120, y, 0.6)); y += 4 + 24
+    for i, b in enumerate(it.get("bullets", [])):
+        f, lines = fit_text(b, BULLET_W, 54, 40, 600, max_lines=2, wrap_below=46, where=f"{where} bullets[{i}]")
+        lh = int(f.size * 1.42)
+        for j, ln in enumerate(lines):
+            cy = y + lh / 2
+            add_text(ln, f, WHITE, cy, 1.1 + i * 0.6)
+            if j == 0:
+                xr = W / 2 + ink_w(ln, f) / 2
+                els.append((pill_tile(18, 18, 9, fill=GOLD + (255,)), xr + 18, cy - 9, 1.1 + i * 0.6))
+            y += lh
+        y += 8
+    price = it.get("price")
+    if price:
+        y += 14
+        f, (pt,) = fit_text(price, 640, 58, 44, where=f"{where} price")
+        pw = ink_w(pt, f) + 90
+        els.append((pill_tile(pw, 90, 40, fill=(56, 47, 18, 255), outline=GOLD + (255,), width=4,
+                              text=pt, f=f, tcolor=GOLD_HI), (W - pw) / 2, y, 2.4))
+        y += 90
+    y += 22
+    f, lines = fit_text(it["plat"], TEXT_W, 50, 34, max_lines=2, wrap_below=40, direction="ltr",
+                        sep=" • ", where=f"{where} plat")
+    lh = int(f.size * 1.35)
+    for ln in lines:
+        add_text(ln, f, GOLD, y + lh / 2, 2.4, direction="ltr"); y += lh
+    h = int(y + 40)
+    # Hard checks: every element inside the card, the card inside the safe area.
+    for tile, x, ty, _ in els:
+        if x < CARD_X0 + 10 or x + tile.width > CARD_X1 - 10:
+            raise TextOverflow(f"{where}: an element is {int(x + tile.width - x)}px wide and leaves the card "
+                               f"(x={int(x)}..{int(x + tile.width)}, card={CARD_X0}..{CARD_X1}).")
+    if CARD_Y + h > SAFE_BOTTOM:
+        raise TextOverflow(f"{where}: card content is {h}px tall but only {SAFE_BOTTOM - CARD_Y}px fit above "
+                           f"the YouTube overlay. Shorten bullets or drop the price/info line.")
+    return {"h": h, "els": els}
+
 def card_layer_img(it, num, t):
+    card = it["_card"]
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
     if it.get("_clip"):                               # gameplay clip (muted) inside the panel
         fr = it["_clip"][min(int(t * FPS), len(it["_clip"]) - 1)]
@@ -227,40 +365,23 @@ def card_layer_img(it, num, t):
     d.rounded_rectangle([(W - PANEL_W) // 2, PANEL_Y, (W + PANEL_W) // 2, PANEL_Y + PANEL_H], 34,
                         outline=GOLD + (255,), width=5)
     d.ellipse([W / 2 - 80, PANEL_Y - 80, W / 2 + 80, PANEL_Y + 80], fill=GOLD + (255,), outline=BLACK + (255,), width=8)
-    d.text((W / 2, PANEL_Y - 4), num, font=font(98), fill=BLACK, anchor="mm")
-    cy = PANEL_Y + PANEL_H + 35
-    d.rounded_rectangle([60, cy, W - 60, cy + 790], 46, fill=(8, 8, 8, 232), outline=GOLD + (255,), width=5)
-    def fade(start): return int(255 * ease_out((t - start) / 0.4))
-    a = fade(0.35)
-    d.rounded_rectangle([W / 2 - 300, cy + 36, W / 2 + 300, cy + 132], 48, fill=GOLD + (a,))
-    d.text((W / 2, cy + 84), it["tag"], font=font(58), fill=BLACK + (a,), anchor="mm", direction="rtl")
-    a = fade(0.6)
-    d.text((W / 2, cy + 215), it["title"], font=fit_font(it["title"], 900, 104), fill=WHITE + (a,), anchor="mm", direction="rtl")
-    if it.get("info"):
-        d.text((W / 2, cy + 292), it["info"], font=fit_font(it["info"], 900, 40, 500, 32), fill=GRAY + (a,), anchor="mm", direction="rtl")
-    d.line([W / 2 - 120, cy + 340, W / 2 + 120, cy + 340], fill=GOLD + (a,), width=4)
-    for i, ln in enumerate(it.get("bullets", it.get("body", []))):
-        a = fade(1.1 + i * 0.6)
-        y = cy + 415 + i * 85
-        tw = d.textlength(ln, font=fit_font(ln, 860, 54, 600, 40), direction="rtl")
-        x_right = W / 2 + tw / 2
-        d.ellipse([x_right + 18, y - 9, x_right + 36, y + 9], fill=GOLD + (a,))
-        d.text((W / 2, y), ln, font=fit_font(ln, 860, 54, 600, 40), fill=WHITE + (a,), anchor="mm", direction="rtl")
-    a = fade(2.4)
-    if it.get("price"):
-        pf = font(58); pw = d.textlength(it["price"], font=pf, direction="rtl") + 90
-        d.rounded_rectangle([W / 2 - pw / 2, cy + 556, W / 2 + pw / 2, cy + 646], 40, outline=GOLD + (a,), width=4,
-                            fill=(212, 175, 55, int(a * 0.15)))
-        d.text((W / 2, cy + 600), it["price"], font=pf, fill=GOLD_HI + (a,), anchor="mm", direction="rtl")
-    d.text((W / 2, cy + 722), it["plat"], font=font(50), fill=GOLD + (a,), anchor="mm")
+    put_text(lay, W / 2, PANEL_Y - 2, str(num), font(98), BLACK, direction="ltr")   # Western digits: ٥ reads as 0
+    d.rounded_rectangle([CARD_X0, CARD_Y, CARD_X1, CARD_Y + card["h"]], 46, fill=(8, 8, 8, 232),
+                        outline=GOLD + (255,), width=5)
+    for tile, x, y, start in card["els"]:
+        blend_on(lay, tile, x, CARD_Y + y, int(255 * ease_out((t - start) / 0.4)))
     return lay
 
 def scene_item(c, t, it, num):
-    lay = card_layer_img(it, num, t) if "_shot" in it else card_layer(it, num, t)
-    x = int((1 - ease_out(t / 0.5)) * W)            # slide in from right
-    out = ease_in((t - (ITEM_D - 0.35)) / 0.35)      # slide out to left
-    x -= int(out * W)
-    c.alpha_composite(lay, (x, 0)) if x >= 0 else c.alpha_composite(lay.crop((-x, 0, W, H)), (0, 0))
+    lay = card_layer_img(it, num, t)
+    k_in = ease_out(t / ENTER)
+    k_out = 1 - ease_in((t - (ITEM_D - EXIT)) / EXIT)
+    k = max(0.0, min(k_in, k_out))
+    dy = int((1 - k_in) * 70 - (1 - k_out) * 40)     # small vertical drift only: no edge clipping
+    if k <= 0: return
+    if k < 1: lay = with_alpha(lay, int(255 * k))
+    if dy >= 0: c.alpha_composite(lay.crop((0, 0, W, H - dy)), (0, dy))
+    else:       c.alpha_composite(lay.crop((0, -dy, W, H)), (0, 0))
 
 def scene_outro(c, t, ep):
     p = ease_out(t / 0.6)
@@ -272,26 +393,50 @@ def scene_outro(c, t, ep):
     if not os.path.exists(_AV_DEFAULT):   # v2 avatar already has its own gold ring
         d.ellipse([W / 2 - s / 2 - 8, 640 - s / 2 - 8, W / 2 + s / 2 + 8, 640 + s / 2 + 8], outline=GOLD + (255,), width=6)
     c.alpha_composite(av, (int(W / 2 - s / 2), int(640 - s / 2)))
+    o = ep["outro"]
     if t > 0.3:
         q = ease_out((t - 0.3) / 0.5)
         pulse = 1 + 0.04 * math.sin(t * 6)
-        glow_text(c, (W / 2, 990), ep["outro"]["title"], font(int(104 * pulse)), GOLD_HI)
-        d.text((W / 2, 1120), ep["outro"]["sub"], font=font(68, 600), fill=WHITE + (int(255 * q),), anchor="mm", direction="rtl")
+        ft, _ = fit_text(o["title"], int(960 / 1.04), 104, 60, where="outro title")   # room for the 4% pulse
+        glow_text(c, (W / 2, 990), o["title"], font(int(ft.size * pulse)), GOLD_HI)
+        fs, _ = fit_text(o["sub"], 960, 68, 44, 600, where="outro sub")
+        put_text(c, W / 2, 1120, o["sub"], fs, WHITE, int(255 * q))
     if t > 0.8:
-        q = ease_out((t - 0.8) / 0.5)
-        d.rounded_rectangle([100, 1250, W - 100, 1390], 70, fill=GOLD + (int(255 * q),))
-        d.text((W / 2, 1320), ep["outro"]["cta"], font=font(50), fill=BLACK + (int(255 * q),), anchor="mm", direction="rtl")
-        d.text((W / 2, 1460), "@Scarfce001", font=font(56), fill=GRAY + (int(255 * q),), anchor="mm")
-
-AR = "٠١٢٣٤٥٦٧٨٩"
+        q = int(255 * ease_out((t - 0.8) / 0.5))
+        fc, _ = fit_text(o["cta"], W - 280, 50, 36, where="outro cta")
+        blend_on(c, pill_tile(W - 200, 140, 70, fill=GOLD + (255,), text=o["cta"], f=fc, tcolor=BLACK), 100, 1250, q)
+        put_text(c, W / 2, 1460, "@Scarfce001", font(56), GRAY, q, direction="ltr")
 
 def timeline(ep):
     tl = [("intro", INTRO_D, None)]
+    n = len(ep["items"])
     for i, it in enumerate(ep["items"]):
-        num = len(ep["items"]) - i if ep.get("countdown") else i + 1
-        tl.append(("item", ITEM_D, (it, AR[num])))
+        num = n - i if ep.get("countdown") else i + 1     # countdown: 5, 4, 3, 2, 1
+        tl.append(("item", ITEM_D, (it, num)))
     tl.append(("outro", OUTRO_D, None))
     return tl
+
+def validate_episode(ep):
+    """Lay out every card and text line once. Collects every overflow/data problem and fails loudly."""
+    errs = []
+    def guard(fn, *a, **k):
+        try: return fn(*a, **k)
+        except TextOverflow as e: errs.append(str(e))
+    guard(fit_text, ep["series"], 720, 56, 56, where="header series")
+    hook = ep["intro"].get("hook") or [ep["intro"]["title"], ep["intro"]["sub"]]
+    guard(fit_text, hook[0], 960, 104, 56, where="intro hook[0]")
+    if len(hook) > 1: guard(fit_text, hook[1], 960, 84, 48, where="intro hook[1]")
+    o = ep["outro"]
+    guard(fit_text, o["title"], int(960 / 1.04), 104, 60, where="outro title")
+    guard(fit_text, o["sub"], 960, 68, 44, 600, where="outro sub")
+    guard(fit_text, o["cta"], W - 280, 50, 36, where="outro cta")
+    for i, it in enumerate(ep["items"]):
+        where = f'{ep["slug"]} item {i} ({it.get("title", "?")})'
+        errs += check_platforms(it, where)
+        card = guard(layout_card, it, where)
+        if card: it["_card"] = card
+    if errs:
+        raise SystemExit("Render aborted, text does not fit or data is inconsistent:\n  - " + "\n  - ".join(errs))
 
 # ---------------------------------------------------------------- audio
 SR = 44100
@@ -408,6 +553,7 @@ def synth_audio(ep, total, cuts, path):
 def render(ep_path, out_path):
     ep = json.load(open(ep_path, encoding="utf-8"))
     load_item_images(ep)
+    validate_episode(ep)                  # fails fast, before minutes of frame rendering
     tl = timeline(ep)
     total = sum(d for _, d, _ in tl)
     tmp = tempfile.mkdtemp()
@@ -437,6 +583,11 @@ def render(ep_path, out_path):
     return out_path, total
 
 if __name__ == "__main__":
+    if sys.argv[1] == "--check":          # validate text layout only, no rendering
+        for p in sys.argv[2:]:
+            e = json.load(open(p, encoding="utf-8")); load_item_images(e); validate_episode(e)
+            print(f"OK  {p}: every text element fits")
+        sys.exit(0)
     ep = sys.argv[1]
     out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "shorts", os.path.basename(ep).replace(".json", ".mp4"))
     print(render(ep, out))
