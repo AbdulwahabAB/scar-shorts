@@ -66,7 +66,10 @@ def skyline_strip():
 
 SKY, SKY_M = skyline_strip()
 LOGO = Image.open(os.path.join(BRAND, "logo_sf_1024.png")).convert("RGBA")
-AVATAR = Image.open(os.path.join(BRAND, "avatar_800x800.png")).convert("RGBA")
+# Default channel avatar: avatar-v2 logo ring (reads best small); falls back to the original avatar.
+_AV_DEFAULT = os.path.join(BRAND, "avatar-v2", "avatar_C_logo_ring.png")
+AVATAR = Image.open(_AV_DEFAULT if os.path.exists(_AV_DEFAULT)
+                    else os.path.join(BRAND, "avatar_800x800.png")).convert("RGBA")
 
 rng = np.random.default_rng(3)
 EMBERS = [(rng.uniform(0, W), rng.uniform(0, H), rng.uniform(40, 140), rng.uniform(2, 6), rng.uniform(0, 6.28))
