@@ -259,7 +259,8 @@ def scene_outro(c, t, ep):
     m = Image.new("L", (s, s), 0); ImageDraw.Draw(m).ellipse([0, 0, s - 1, s - 1], fill=255)
     av.putalpha(m)
     d = ImageDraw.Draw(c)
-    d.ellipse([W / 2 - s / 2 - 8, 640 - s / 2 - 8, W / 2 + s / 2 + 8, 640 + s / 2 + 8], outline=GOLD + (255,), width=6)
+    if not os.path.exists(_AV_DEFAULT):   # v2 avatar already has its own gold ring
+        d.ellipse([W / 2 - s / 2 - 8, 640 - s / 2 - 8, W / 2 + s / 2 + 8, 640 + s / 2 + 8], outline=GOLD + (255,), width=6)
     c.alpha_composite(av, (int(W / 2 - s / 2), int(640 - s / 2)))
     if t > 0.3:
         q = ease_out((t - 0.3) / 0.5)
