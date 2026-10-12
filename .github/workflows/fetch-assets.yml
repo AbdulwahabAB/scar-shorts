@@ -19,16 +19,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-      - name: Fetch Steam images for episodes missing assets
+      - name: Fetch Steam images and clips for new or changed episodes
         run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- 'episodes/*.json' || true)
+          fi
           for f in episodes/*.json; do
             slug=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['slug'])" "$f")
-            if [ ! -f "assets/$slug/manifest.json" ] || [ "$f" -nt "assets/$slug/manifest.json" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ ! -f "assets/$slug/manifest.json" ] || echo "$changed" | grep -qx "$f"; then
               python3 tools/fetch_images.py "$f"
             fi
           done
