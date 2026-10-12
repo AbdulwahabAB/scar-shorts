@@ -4,7 +4,7 @@ For every item that has "steam": "<exact game name>" (or "steam_appid": 123),
 downloads the store header and the first screenshots into assets/<slug>/,
 and writes assets/<slug>/manifest.json. Runs on GitHub Actions (needs internet).
 """
-import json, os, re, sys, urllib.parse, urllib.request
+import json, os, re, subprocess, sys, urllib.parse, urllib.request
 
 UA = {"User-Agent": "scar-shorts/1.0"}
 
@@ -25,6 +25,23 @@ def find_appid(name):
             return it["id"], it["name"]
     print(f"  no exact match for {name!r}; candidates: {[i['name'] for i in items[:5]]}")
     return None, None
+
+def movie_url(m):
+    for k in ("mp4", "webm"):
+        v = m.get(k)
+        if isinstance(v, dict):
+            for q in ("max", "480"):
+                if v.get(q): return v[q]
+    for k in ("hls_h264", "dash_h264", "dash_av1"):
+        if m.get(k): return m[k]
+    return None
+
+def cut_clip(url, dst, start, dur=6.5):
+    """Short, MUTED clip sized for the 960x430 card panel."""
+    vf = "scale=960:430:force_original_aspect_ratio=increase,crop=960:430,fps=30"
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-ss", str(start), "-i", url.split("?")[0] if "mp4" in url else url,
+           "-t", str(dur), "-an", "-vf", vf, "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p", dst]
+    subprocess.run(cmd, check=True, timeout=300)
 
 def main(ep_path):
     ep = json.load(open(ep_path, encoding="utf-8"))
@@ -58,6 +75,18 @@ def main(ep_path):
             fn = f"{idx}_{key}.jpg"
             open(os.path.join(out, fn), "wb").write(get(url.split("?")[0], binary=True))
             entry["files"][key] = fn
+        movies = data.get("movies") or []
+        if movies and not it.get("no_clip"):
+            pick = next((m for m in movies if "gameplay" in (m.get("name") or "").lower()), movies[0])
+            entry["movie"] = {"name": pick.get("name"), "keys": sorted(pick.keys())}
+            url = movie_url(pick)
+            if url:
+                try:
+                    fn = f"{idx}_clip.mp4"
+                    cut_clip(url, os.path.join(out, fn), it.get("clip_start", 18))
+                    entry["files"]["clip"] = fn
+                except Exception as e:
+                    print(f"  clip failed for {appid}: {e}")
         manifest[str(idx)] = entry
         print(f"  item {idx}: {entry['name']} ({appid}) -> {list(entry['files'])}")
     json.dump(manifest, open(os.path.join(out, "manifest.json"), "w"), indent=2, ensure_ascii=False)
