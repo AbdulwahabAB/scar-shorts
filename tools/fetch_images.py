@@ -40,7 +40,16 @@ def main(ep_path):
         data = det.get(str(appid), {}).get("data")
         if not data:
             print(f"  appdetails empty for {appid}"); continue
-        entry = {"appid": appid, "name": data.get("name"), "files": {}}
+        po = data.get("price_overview") or {}
+        entry = {"appid": appid, "name": data.get("name"), "files": {},
+                 "meta": {"developers": data.get("developers", []), "publishers": data.get("publishers", []),
+                          "genres": [g.get("description") for g in data.get("genres", [])],
+                          "is_free": data.get("is_free", False),
+                          "price": po.get("final_formatted"), "currency": po.get("currency"),
+                          "discount": po.get("discount_percent"),
+                          "release_date": (data.get("release_date") or {}).get("date"),
+                          "coming_soon": (data.get("release_date") or {}).get("coming_soon"),
+                          "short_description": data.get("short_description")}}
         urls = {"header": data.get("header_image")}
         for k, s in enumerate((data.get("screenshots") or [])[:3]):
             urls[f"shot{k}"] = s.get("path_full")
