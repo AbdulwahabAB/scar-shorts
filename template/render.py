@@ -18,7 +18,7 @@ BLACK = (11, 11, 11)
 GRAY = (167, 167, 167)
 WHITE = (245, 245, 245)
 
-INTRO_D, ITEM_D, OUTRO_D = 3.0, 4.6, 4.0
+INTRO_D, ITEM_D, OUTRO_D = 3.0, 6.5, 4.0
 
 _fc = {}
 def font(size, weight=700):
@@ -166,20 +166,25 @@ def cover(img, w, h, zoom=1.0):
     x, y = (im.width - w) // 2, (im.height - h) // 2
     return im.crop((x, y, x + w, y + h))
 
+def _prep_item(it, shot):
+    it["_shot"] = shot
+    bg = cover(shot, W, H, 1.0).filter(ImageFilter.GaussianBlur(28))
+    it["_bg"] = Image.blend(bg, Image.new("RGB", (W, H), BLACK), 0.55)
+
 def load_item_images(ep):
     mpath = os.path.join(ROOT, "assets", ep["slug"], "manifest.json")
-    if not os.path.exists(mpath): return
-    man = json.load(open(mpath, encoding="utf-8"))
+    man = json.load(open(mpath, encoding="utf-8")) if os.path.exists(mpath) else {}
+    brand_panel = Image.open(os.path.join(BRAND, "banner_original.png")).convert("RGB")
+    bw, bh = brand_panel.size
+    brand_panel = brand_panel.crop((0, int(bh * .30), int(bw * .55), int(bh * .70)))   # Riyadh skyline
     for i, it in enumerate(ep["items"]):
-        e = man.get(str(i))
-        if not e: continue
-        fn = e["files"].get(it.get("shot", "shot0"))
-        if not fn: continue
-        shot = Image.open(os.path.join(ROOT, "assets", ep["slug"], fn)).convert("RGB")
-        it["_shot"] = shot
-        bg = cover(shot, W, H, 1.0).filter(ImageFilter.GaussianBlur(28))
-        bg = Image.blend(bg, Image.new("RGB", (W, H), BLACK), 0.55)
-        it["_bg"] = bg
+        e = man.get(str(i)) or {}
+        meta = e.get("meta") or {}
+        if "price" not in it and meta.get("price"):
+            it["price"] = meta["price"].replace("SR", "ريال").strip()
+        fn = (e.get("files") or {}).get(it.get("shot", "shot0"))
+        shot = Image.open(os.path.join(ROOT, "assets", ep["slug"], fn)).convert("RGB") if fn else brand_panel
+        _prep_item(it, shot)
 
 def item_background(it, t, gt):
     base = background(gt)
@@ -189,7 +194,7 @@ def item_background(it, t, gt):
     bg = cover(it["_bg"], W, H, z).convert("RGBA")
     return Image.blend(base, bg, max(0.0, min(1.0, k)))
 
-PANEL_W, PANEL_H, PANEL_Y = 960, 540, 330
+PANEL_W, PANEL_H, PANEL_Y = 960, 430, 330
 def card_layer_img(it, num, t):
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
     z = 1 + 0.07 * t / ITEM_D                         # slow ken-burns inside the panel
@@ -197,22 +202,33 @@ def card_layer_img(it, num, t):
     lay.alpha_composite(panel, ((W - PANEL_W) // 2, PANEL_Y))
     d.rounded_rectangle([(W - PANEL_W) // 2, PANEL_Y, (W + PANEL_W) // 2, PANEL_Y + PANEL_H], 34,
                         outline=GOLD + (255,), width=5)
-    d.ellipse([W / 2 - 85, PANEL_Y - 85, W / 2 + 85, PANEL_Y + 85], fill=GOLD + (255,), outline=BLACK + (255,), width=8)
-    d.text((W / 2, PANEL_Y - 4), num, font=font(104), fill=BLACK, anchor="mm")
-    cy = PANEL_Y + PANEL_H + 40
-    d.rounded_rectangle([60, cy, W - 60, cy + 650], 46, fill=(8, 8, 8, 230), outline=GOLD + (255,), width=5)
+    d.ellipse([W / 2 - 80, PANEL_Y - 80, W / 2 + 80, PANEL_Y + 80], fill=GOLD + (255,), outline=BLACK + (255,), width=8)
+    d.text((W / 2, PANEL_Y - 4), num, font=font(98), fill=BLACK, anchor="mm")
+    cy = PANEL_Y + PANEL_H + 35
+    d.rounded_rectangle([60, cy, W - 60, cy + 790], 46, fill=(8, 8, 8, 232), outline=GOLD + (255,), width=5)
     def fade(start): return int(255 * ease_out((t - start) / 0.4))
     a = fade(0.35)
-    d.rounded_rectangle([W / 2 - 280, cy + 45, W / 2 + 280, cy + 137], 46, fill=GOLD + (a,))
-    d.text((W / 2, cy + 89), it["tag"], font=font(52), fill=BLACK + (a,), anchor="mm", direction="rtl")
+    d.rounded_rectangle([W / 2 - 270, cy + 40, W / 2 + 270, cy + 126], 43, fill=GOLD + (a,))
+    d.text((W / 2, cy + 82), it["tag"], font=font(50), fill=BLACK + (a,), anchor="mm", direction="rtl")
     a = fade(0.6)
-    d.text((W / 2, cy + 240), it["title"], font=font(92), fill=WHITE + (a,), anchor="mm", direction="rtl")
-    d.line([W / 2 - 120, cy + 315, W / 2 + 120, cy + 315], fill=GOLD + (a,), width=4)
-    a = fade(0.9)
-    for i, ln in enumerate(it["body"]):
-        d.text((W / 2, cy + 395 + i * 84), ln, font=font(58, 500), fill=GRAY + (a,), anchor="mm", direction="rtl")
-    a = fade(1.3)
-    d.text((W / 2, cy + 590), it["plat"], font=font(48), fill=GOLD_HI + (a,), anchor="mm")
+    d.text((W / 2, cy + 210), it["title"], font=font(88), fill=WHITE + (a,), anchor="mm", direction="rtl")
+    if it.get("info"):
+        d.text((W / 2, cy + 292), it["info"], font=font(40, 500), fill=GRAY + (a,), anchor="mm", direction="rtl")
+    d.line([W / 2 - 120, cy + 340, W / 2 + 120, cy + 340], fill=GOLD + (a,), width=4)
+    for i, ln in enumerate(it.get("bullets", it.get("body", []))):
+        a = fade(1.1 + i * 0.6)
+        y = cy + 415 + i * 85
+        tw = d.textlength(ln, font=font(50, 600), direction="rtl")
+        x_right = W / 2 + tw / 2
+        d.ellipse([x_right + 18, y - 9, x_right + 36, y + 9], fill=GOLD + (a,))
+        d.text((W / 2, y), ln, font=font(50, 600), fill=WHITE + (a,), anchor="mm", direction="rtl")
+    a = fade(2.4)
+    if it.get("price"):
+        pf = font(50); pw = d.textlength(it["price"], font=pf, direction="rtl") + 90
+        d.rounded_rectangle([W / 2 - pw / 2, cy + 560, W / 2 + pw / 2, cy + 640], 40, outline=GOLD + (a,), width=4,
+                            fill=(212, 175, 55, int(a * 0.15)))
+        d.text((W / 2, cy + 600), it["price"], font=pf, fill=GOLD_HI + (a,), anchor="mm", direction="rtl")
+    d.text((W / 2, cy + 715), it["plat"], font=font(46), fill=GOLD + (a,), anchor="mm")
     return lay
 
 def scene_item(c, t, it, num):

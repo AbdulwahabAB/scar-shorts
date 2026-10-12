@@ -9,42 +9,50 @@
     {
       "tag": "الثلاثاء ١٣ أكتوبر",
       "title": "Valor Mortis",
-      "body": [
-        "تنزل الثلاثاء"
-      ],
       "plat": "PS5 • Xbox • PC",
       "steam": "Valor Mortis",
-      "shot": "shot0"
+      "shot": "shot0",
+      "info": "سولز لايك بمنظور أول • One More Level",
+      "bullets": [
+        "من مطوري Ghostrunner",
+        "متوفرة من أول يوم على Game Pass"
+      ],
+      "price": "Game Pass"
     },
     {
       "tag": "الثلاثاء ١٣ أكتوبر",
       "title": "Planet Zoo 2",
-      "body": [
-        "تنزل بنفس اليوم"
-      ],
       "plat": "PS5 • Xbox • PC",
       "steam": "Planet Zoo 2",
-      "shot": "shot0"
+      "shot": "shot0",
+      "info": "محاكاة وإدارة • Frontier",
+      "bullets": [
+        "لأول مرة: أحواض مائية وأقفاص طيور",
+        "تقدر تطلق الحيوانات في محميات طبيعية"
+      ]
     },
     {
       "tag": "الخميس ١٥ أكتوبر",
-      "title": "عودة Castlevania",
-      "body": [
-        "جزء جديد باسم",
-        "Belmont's Curse"
-      ],
+      "title": "Castlevania",
       "plat": "PS5 • Xbox • Switch • PC",
       "steam": "Castlevania: Belmont's Curse",
-      "shot": "shot2"
+      "shot": "shot2",
+      "info": "أكشن واستكشاف 2D • من مطوري Dead Cells",
+      "bullets": [
+        "جزء جديد: Belmont's Curse",
+        "الديمو متوفر وتقدمك ينتقل للعبة"
+      ]
     },
     {
       "tag": "١٩ - ٢٦ أكتوبر",
       "title": "Steam Next Fest",
-      "body": [
-        "أسبوع كامل من الديموهات المجانية",
-        "جربها قبل تشتري"
+      "plat": "PC",
+      "info": "حدث سنوي على Steam",
+      "bullets": [
+        "مئات الديموهات لألعاب جاية",
+        "جربها قبل لا تشتري"
       ],
-      "plat": "PC"
+      "price": "مجاني"
     }
   ],
   "outro": {
