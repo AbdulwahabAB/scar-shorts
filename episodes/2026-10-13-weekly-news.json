@@ -1,0 +1,11 @@
+{
+  "slug": "2026-10-13-weekly-news",
+  "series": "أخبار سكار في دقيقة",
+  "intro": {"title": "٣ أخبار ألعاب", "sub": "لازم تعرفها هالأسبوع"},
+  "items": [
+    {"tag": "الثلاثاء ١٣ أكتوبر", "title": "يوم مزدحم!", "body": ["Valor Mortis و Planet Zoo 2", "ينزلون بنفس اليوم"], "plat": "PS5 • Xbox • PC"},
+    {"tag": "الخميس ١٥ أكتوبر", "title": "عودة Castlevania", "body": ["جزء جديد باسم", "Belmont's Curse"], "plat": "PS5 • Xbox • Switch • PC"},
+    {"tag": "١٩ - ٢٦ أكتوبر", "title": "Steam Next Fest", "body": ["أسبوع كامل من الديموهات المجانية", "جربها قبل تشتري"], "plat": "PC"}
+  ],
+  "outro": {"title": "أي لعبة بتجرب؟", "sub": "اكتبها بالتعليقات", "cta": "اشترك عشان توصلك الأخبار أول بأول"}
+}
