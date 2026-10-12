@@ -3,7 +3,11 @@
   "series": "أخبار سكار في دقيقة",
   "intro": {
     "title": "٤ أخبار ألعاب",
-    "sub": "لازم تعرفها هالأسبوع"
+    "sub": "لازم تعرفها هالأسبوع",
+    "hook": [
+      "٤ أخبار ألعاب هالأسبوع",
+      "وأولها من صناع Ghostrunner!"
+    ]
   },
   "items": [
     {
@@ -33,13 +37,13 @@
     },
     {
       "tag": "الخميس ١٥ أكتوبر",
-      "title": "Castlevania",
+      "title": "Castlevania: Belmont's Curse",
       "plat": "PS5 • Xbox • Switch • PC",
       "steam": "Castlevania: Belmont's Curse",
       "shot": "shot2",
       "info": "أكشن واستكشاف 2D • من مطوري Dead Cells",
       "bullets": [
-        "جزء جديد: Belmont's Curse",
+        "البطلة روز ابنة تريفور بلمونت",
         "الديمو متوفر وتقدمك ينتقل للعبة"
       ]
     },

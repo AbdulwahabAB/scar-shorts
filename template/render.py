@@ -118,19 +118,30 @@ def sweep(canvas, p):
     canvas.alpha_composite(g.filter(ImageFilter.GaussianBlur(30)))
 
 # ---------------------------------------------------------------- scenes
+def fit_font(text, max_w, size, weight=700, min_size=48):
+    d = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    while size > min_size and d.textlength(text, font=font(size, weight), direction="rtl") > max_w:
+        size -= 4
+    return font(size, weight)
+
 def scene_intro(c, t, ep):
-    p = ease_out(t / 0.7)
-    size = int(200 + 380 * p)
-    paste_logo(c, size, W / 2, 700, int(255 * min(1, t / 0.3)))
-    if t > 0.5:
-        q = ease_out((t - 0.5) / 0.5)
-        lay = Image.new("RGBA", c.size, (0, 0, 0, 0))
-        glow_text(lay, (W / 2, 1080 + (1 - q) * 60), ep["intro"]["title"], font(120), GOLD_HI)
-        ImageDraw.Draw(lay).text((W / 2, 1230 + (1 - q) * 60), ep["intro"]["sub"], font=font(66, 600),
-                                 fill=WHITE, anchor="mm", direction="rtl")
-        lay.putalpha(lay.getchannel("A").point(lambda v: int(v * q)))
-        c.alpha_composite(lay)
-    sweep(c, (t - 0.2) / 0.9)
+    """Hook first (readable from frame 1), then a short logo slam."""
+    hook = ep["intro"].get("hook") or [ep["intro"]["title"], ep["intro"]["sub"]]
+    p = ease_out(t / 0.25)
+    lay = Image.new("RGBA", c.size, (0, 0, 0, 0))
+    s1 = fit_font(hook[0], 960, int(104 * (0.9 + 0.1 * p)))
+    glow_text(lay, (W / 2, 640), hook[0], s1, GOLD_HI, r=16)
+    if len(hook) > 1:
+        q = ease_out((t - 0.35) / 0.35)
+        s2 = fit_font(hook[1], 960, 84, 700)
+        ImageDraw.Draw(lay).text((W / 2, 790 + (1 - q) * 40), hook[1], font=s2,
+                                 fill=WHITE + (int(255 * q),), anchor="mm", direction="rtl")
+    c.alpha_composite(lay)
+    if t > 1.1:                                   # logo slam
+        q = ease_out((t - 1.1) / 0.35)
+        size = int(560 - 200 * q)
+        paste_logo(c, size, W / 2, 1180, int(255 * q))
+    sweep(c, (t - 1.1) / 0.8)
 
 def card_layer(it, num, t):
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
@@ -208,27 +219,27 @@ def card_layer_img(it, num, t):
     d.rounded_rectangle([60, cy, W - 60, cy + 790], 46, fill=(8, 8, 8, 232), outline=GOLD + (255,), width=5)
     def fade(start): return int(255 * ease_out((t - start) / 0.4))
     a = fade(0.35)
-    d.rounded_rectangle([W / 2 - 270, cy + 40, W / 2 + 270, cy + 126], 43, fill=GOLD + (a,))
-    d.text((W / 2, cy + 82), it["tag"], font=font(50), fill=BLACK + (a,), anchor="mm", direction="rtl")
+    d.rounded_rectangle([W / 2 - 300, cy + 36, W / 2 + 300, cy + 132], 48, fill=GOLD + (a,))
+    d.text((W / 2, cy + 84), it["tag"], font=font(58), fill=BLACK + (a,), anchor="mm", direction="rtl")
     a = fade(0.6)
-    d.text((W / 2, cy + 210), it["title"], font=font(88), fill=WHITE + (a,), anchor="mm", direction="rtl")
+    d.text((W / 2, cy + 215), it["title"], font=fit_font(it["title"], 900, 104), fill=WHITE + (a,), anchor="mm", direction="rtl")
     if it.get("info"):
-        d.text((W / 2, cy + 292), it["info"], font=font(40, 500), fill=GRAY + (a,), anchor="mm", direction="rtl")
+        d.text((W / 2, cy + 292), it["info"], font=fit_font(it["info"], 900, 40, 500, 32), fill=GRAY + (a,), anchor="mm", direction="rtl")
     d.line([W / 2 - 120, cy + 340, W / 2 + 120, cy + 340], fill=GOLD + (a,), width=4)
     for i, ln in enumerate(it.get("bullets", it.get("body", []))):
         a = fade(1.1 + i * 0.6)
         y = cy + 415 + i * 85
-        tw = d.textlength(ln, font=font(50, 600), direction="rtl")
+        tw = d.textlength(ln, font=fit_font(ln, 860, 54, 600, 40), direction="rtl")
         x_right = W / 2 + tw / 2
         d.ellipse([x_right + 18, y - 9, x_right + 36, y + 9], fill=GOLD + (a,))
-        d.text((W / 2, y), ln, font=font(50, 600), fill=WHITE + (a,), anchor="mm", direction="rtl")
+        d.text((W / 2, y), ln, font=fit_font(ln, 860, 54, 600, 40), fill=WHITE + (a,), anchor="mm", direction="rtl")
     a = fade(2.4)
     if it.get("price"):
-        pf = font(50); pw = d.textlength(it["price"], font=pf, direction="rtl") + 90
-        d.rounded_rectangle([W / 2 - pw / 2, cy + 560, W / 2 + pw / 2, cy + 640], 40, outline=GOLD + (a,), width=4,
+        pf = font(58); pw = d.textlength(it["price"], font=pf, direction="rtl") + 90
+        d.rounded_rectangle([W / 2 - pw / 2, cy + 556, W / 2 + pw / 2, cy + 646], 40, outline=GOLD + (a,), width=4,
                             fill=(212, 175, 55, int(a * 0.15)))
         d.text((W / 2, cy + 600), it["price"], font=pf, fill=GOLD_HI + (a,), anchor="mm", direction="rtl")
-    d.text((W / 2, cy + 715), it["plat"], font=font(46), fill=GOLD + (a,), anchor="mm")
+    d.text((W / 2, cy + 722), it["plat"], font=font(50), fill=GOLD + (a,), anchor="mm")
     return lay
 
 def scene_item(c, t, it, num):
@@ -269,38 +280,114 @@ def timeline(ep):
 
 # ---------------------------------------------------------------- audio
 SR = 44100
+DROP_AT = 1.1          # logo slam in the intro: full beat drops here
+
 def synth_audio(ep, total, cuts, path):
-    n = int(total * SR); t = np.arange(n) / SR
-    out = np.zeros(n, np.float32)
-    bpm = 100; beat = 60 / bpm
-    def add(sig, at):
-        i = int(at * SR); j = min(n, i + len(sig)); out[i:j] += sig[: j - i]
-    # kick
-    kt = np.arange(int(.35 * SR)) / SR
-    kick = np.sin(2 * np.pi * (45 + 90 * np.exp(-kt * 30)) * kt) * np.exp(-kt * 9) * .55
-    # hat
-    hn = np.random.default_rng(1).standard_normal(int(.06 * SR)).astype(np.float32)
-    hat = np.diff(hn, prepend=0) * np.exp(-np.arange(len(hn)) / SR * 70) * .07
-    b = 0.0; k = 0
-    while b < total - 0.5:
-        if k % 2 == 0: add(kick, b)
-        add(hat, b + beat / 2)
-        b += beat; k += 1
-    # dark pad (A minor-ish), slow fade in/out
-    pad = sum(np.sin(2 * np.pi * f * t) * a for f, a in [(55, .10), (110, .06), (130.8, .04), (164.8, .035)])
-    env = np.minimum(1, t / 1.5) * np.minimum(1, (total - t) / 1.5)
-    out += (pad * env * (0.8 + 0.2 * np.sin(2 * np.pi * t / 4))).astype(np.float32)
-    # whooshes at scene cuts
-    wl = int(.5 * SR); wt = np.arange(wl) / SR
-    wn = np.random.default_rng(2).standard_normal(wl).astype(np.float32)
-    whoosh = np.convolve(wn, np.ones(30) / 30, "same") * np.sin(np.pi * wt / .5) ** 2 * .45
-    for c in cuts: add(whoosh, max(0, c - 0.25))
-    # impact on logo reveal
-    add(kick * 1.6, 0.05)
-    out = np.tanh(out * 1.2) * 0.8
+    """Energetic dark trap bed (140 BPM, A minor) + risers/impacts on scene cuts. All synthesized."""
+    from scipy.signal import butter, sosfilt
+    rng = np.random.default_rng(11)
+    n = int(total * SR) + SR
+    drums = np.zeros(n, np.float32); music = np.zeros(n, np.float32); fx = np.zeros(n, np.float32)
+    duck = np.ones(n, np.float32)
+
+    def add(buf, sig, at, gain=1.0):
+        i = int(at * SR)
+        if i >= n or i + len(sig) <= 0: return
+        j = min(n, i + len(sig)); buf[max(0, i):j] += (sig[max(0, -i): j - i] * gain).astype(np.float32)
+    def env(L, a, d):            # attack/decay envelope, seconds
+        t = np.arange(int(L * SR)) / SR
+        return np.minimum(1, t / max(a, 1e-4)) * np.exp(-t / d)
+    def bp(x, lo, hi): return sosfilt(butter(2, [lo, hi], "bandpass", fs=SR, output="sos"), x)
+    def lp(x, f): return sosfilt(butter(2, f, "lowpass", fs=SR, output="sos"), x)
+    def hp(x, f): return sosfilt(butter(2, f, "highpass", fs=SR, output="sos"), x)
+
+    # ---- instruments
+    kt = np.arange(int(.45 * SR)) / SR
+    kick = np.sin(2 * np.pi * np.cumsum(45 + 140 * np.exp(-kt * 38)) / SR) * np.exp(-kt * 7)
+    kick[:120] += rng.standard_normal(120) * np.linspace(.6, 0, 120)            # click
+    kick = np.tanh(kick * 1.8) * .9
+    clap = bp(rng.standard_normal(int(.25 * SR)), 900, 4500) * env(.25, .002, .06) * .9
+    clap += np.sin(2 * np.pi * 190 * np.arange(len(clap)) / SR) * env(.25, .001, .04) * .35
+    hat = hp(rng.standard_normal(int(.05 * SR)), 7000) * env(.05, .0005, .012) * .28
+    ohat = hp(rng.standard_normal(int(.25 * SR)), 6500) * env(.25, .001, .09) * .18
+
+    def bass808(freq, L, glide_from=None):
+        t = np.arange(int(L * SR)) / SR
+        f = np.full_like(t, freq)
+        if glide_from: f = freq + (glide_from - freq) * np.exp(-t * 18)
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        x = np.sin(ph) + .35 * np.sin(2 * ph) + .12 * np.sin(3 * ph)   # harmonics so phones hear it
+        return np.tanh(x * 2.2) * .7 * np.minimum(1, t / .005) * np.exp(-t / (L * .6))
+
+    def saw(freq, L, harm=7):
+        t = np.arange(int(L * SR)) / SR
+        return sum(np.sin(2 * np.pi * freq * k * t) / k for k in range(1, harm + 1)) * .5
+
+    bpm = 140; beat = 60 / bpm; bar = beat * 4; s16 = beat / 4
+    roots = [55.0, 43.65, 49.0, 41.2]                       # A1 F1 G1 E1
+    chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [196, 246.9, 293.7], [164.8, 207.7, 246.9]]
+    arp = [[440, 523.3, 659.3, 523.3], [349.2, 440, 523.3, 440], [392, 493.9, 587.3, 493.9], [329.6, 415.3, 493.9, 415.3]]
+    end_beat = total - 0.7
+
+    # ---- intro (before drop): tension
+    add(fx, kick * 1.3, 0.0)
+    boom_t = np.arange(int(1.5 * SR)) / SR
+    boom = np.sin(2 * np.pi * np.cumsum(38 + 30 * np.exp(-boom_t * 6)) / SR) * np.exp(-boom_t * 2.2) * .9
+    add(fx, boom, 0.0, .8)
+    add(music, saw(110, DROP_AT, 5) * env(DROP_AT, .02, 3) * .18, 0.0)
+    rise_L = DROP_AT
+    nz = hp(rng.standard_normal(int(rise_L * SR)), 1500)
+    add(fx, nz * np.linspace(0, 1, len(nz)) ** 2 * .2, 0.0)
+
+    # ---- main loop from the drop
+    tb = DROP_AT; k = 0
+    while tb < end_beat:
+        ci = (k // 16) % 4                                   # chord per bar (16 sixteenths)
+        step = k % 16
+        if step in (0, 10) or (step == 7 and (k // 16) % 2): # trap kick pattern
+            add(drums, kick, tb)
+            L = min(bar, end_beat - tb + .3)
+            g = roots[(ci + 1) % 4] * 2 if step == 10 and ci % 2 else None
+            add(music, bass808(roots[ci], max(.2, L * .9), glide_from=g), tb)
+            e = 1 - .65 * np.exp(-np.arange(int(.3 * SR)) / SR / .08)
+            i = int(tb * SR); duck[i:i + len(e)] = np.minimum(duck[i:i + len(e)], e[: max(0, min(len(e), n - i))])
+        if step in (4, 12): add(drums, clap, tb)
+        roll = (k // 16) % 2 == 1 and step >= 12
+        if step % 2 == 0 or roll:
+            add(drums, hat, tb, .9 if step % 4 == 0 else .6)
+        if roll and step == 14:                              # triplet flutter
+            for r in range(3): add(drums, hat, tb + r * s16 * 2 / 3, .5)
+        if step == 14 and not roll: add(drums, ohat, tb)
+        if step % 2 == 0:                                    # dark arp (8ths)
+            f = arp[ci][(step // 2) % 4]
+            add(music, lp(saw(f, s16 * 1.8, 6), 2600) * env(s16 * 1.8, .003, .12) * .55, tb)
+        if step == 0:                                        # pad chord per bar
+            L = min(bar, end_beat - tb)
+            pad = sum(saw(f / 2, L, 4) for f in chords[ci]) * env(L, .08, L) * .11
+            add(music, lp(pad, 1500), tb)
+        tb += s16; k += 1
+
+    # ---- risers + impacts on every scene cut
+    for c in cuts:
+        L = 0.9
+        r = hp(rng.standard_normal(int(L * SR)), 2000) * np.linspace(0, 1, int(L * SR)) ** 2.5 * .25
+        t = np.arange(int(L * SR)) / SR
+        r += np.sin(2 * np.pi * np.cumsum(300 + 900 * (t / L) ** 2) / SR) * (t / L) ** 3 * .12
+        add(fx, r, c - L)
+        add(fx, kick * 1.2, c)
+        add(fx, boom * .6, c)
+        add(fx, hp(rng.standard_normal(int(.4 * SR)), 3000) * env(.4, .001, .08) * .25, c)   # crash-ish
+    # outro ending hit
+    add(fx, kick * 1.3, end_beat); add(fx, boom, end_beat, .9)
+
+    mix = drums * .95 + music * duck * .9 + fx * .85
+    mix = mix[: int(total * SR)]
+    fade = np.minimum(1, (total - np.arange(len(mix)) / SR) / .4)
+    mix = np.tanh(mix * 1.15) * fade
+    mix = mix / (np.abs(mix).max() + 1e-9) * .89
     with wave.open(path, "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
-        w.writeframes((out * 32767).astype(np.int16).tobytes())
+        w.writeframes((mix * 32767).astype(np.int16).tobytes())
 
 # ---------------------------------------------------------------- render
 def render(ep_path, out_path):
@@ -321,8 +408,8 @@ def render(ep_path, out_path):
             else: scene_outro(c, t, ep)
             progress(c, gt + t, total)
             # fade from black at very start, to black at very end
-            if gt + t < 0.25 or total - (gt + t) < 0.3:
-                k = min((gt + t) / 0.25, (total - gt - t) / 0.3)
+            if gt + t < 0.06 or total - (gt + t) < 0.3:
+                k = min((gt + t) / 0.06, (total - gt - t) / 0.3)
                 c = Image.blend(Image.new("RGBA", (W, H), BLACK + (255,)), c, max(0, min(1, k)))
             c.convert("RGB").save(os.path.join(tmp, f"{n:05d}.jpg"), quality=92)
             n += 1
