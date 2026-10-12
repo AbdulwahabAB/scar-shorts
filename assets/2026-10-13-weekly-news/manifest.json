@@ -6,7 +6,8 @@
       "header": "0_header.jpg",
       "shot0": "0_shot0.jpg",
       "shot1": "0_shot1.jpg",
-      "shot2": "0_shot2.jpg"
+      "shot2": "0_shot2.jpg",
+      "clip": "0_clip.mp4"
     },
     "meta": {
       "developers": [
@@ -28,6 +29,18 @@
       "release_date": "13 Oct, 2026",
       "coming_soon": true,
       "short_description": "Valor Mortis is a first-person action soulslike from the creators of Ghostrunner. Rise from death as a former soldier of Napoleon’s army. Wield supernatural powers, battle horrifying monsters, and unravel a conspiracy that threatens all of humanity."
+    },
+    "movie": {
+      "name": "Gameplay Overview Trailer",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
     }
   },
   "1": {
@@ -37,7 +50,8 @@
       "header": "1_header.jpg",
       "shot0": "1_shot0.jpg",
       "shot1": "1_shot1.jpg",
-      "shot2": "1_shot2.jpg"
+      "shot2": "1_shot2.jpg",
+      "clip": "1_clip.mp4"
     },
     "meta": {
       "developers": [
@@ -57,6 +71,18 @@
       "release_date": "13 Oct, 2026",
       "coming_soon": true,
       "short_description": "Build a wilder world in Planet Zoo 2. Create distinctive zoos around the globe filled with awe-inspiring animals, including fully aquatic and flying species, before taking your experience beyond the zoo to release your animals into expansive Wildlife Reserves."
+    },
+    "movie": {
+      "name": "Planet Zoo 2 Gameplay Trailer - En",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
     }
   },
   "2": {
@@ -66,7 +92,8 @@
       "header": "2_header.jpg",
       "shot0": "2_shot0.jpg",
       "shot1": "2_shot1.jpg",
-      "shot2": "2_shot2.jpg"
+      "shot2": "2_shot2.jpg",
+      "clip": "2_clip.mp4"
     },
     "meta": {
       "developers": [
@@ -87,6 +114,18 @@
       "release_date": "14 Oct, 2026",
       "coming_soon": true,
       "short_description": "Crimson Curse —Will Your Fate Bloom in Despair or Salvation Set 23 years after Castlevania Dracula's Curse - follow Rose Belmont's journey in an all new 2D Action-Exploration title from KONAMI, Evil Empire and Motion Twin."
+    },
+    "movie": {
+      "name": "Gameplay & Commentary Trailer",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
     }
   }
 }
