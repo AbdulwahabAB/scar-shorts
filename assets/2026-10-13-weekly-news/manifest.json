@@ -7,16 +7,86 @@
       "shot0": "0_shot0.jpg",
       "shot1": "0_shot1.jpg",
       "shot2": "0_shot2.jpg"
+    },
+    "meta": {
+      "developers": [
+        "One More Level"
+      ],
+      "publishers": [
+        "Lyrical Games",
+        "One More Level"
+      ],
+      "genres": [
+        "Action",
+        "Adventure",
+        "RPG"
+      ],
+      "is_free": false,
+      "price": null,
+      "currency": null,
+      "discount": null,
+      "release_date": "13 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "Valor Mortis is a first-person action soulslike from the creators of Ghostrunner. Rise from death as a former soldier of Napoleon’s army. Wield supernatural powers, battle horrifying monsters, and unravel a conspiracy that threatens all of humanity."
     }
   },
   "1": {
-    "appid": 4231820,
-    "name": "Castlevania: Belmont's Curse",
+    "appid": 3219030,
+    "name": "Planet Zoo 2",
     "files": {
       "header": "1_header.jpg",
       "shot0": "1_shot0.jpg",
       "shot1": "1_shot1.jpg",
       "shot2": "1_shot2.jpg"
+    },
+    "meta": {
+      "developers": [
+        "Frontier Developments"
+      ],
+      "publishers": [
+        "Frontier Developments"
+      ],
+      "genres": [
+        "Simulation",
+        "Strategy"
+      ],
+      "is_free": false,
+      "price": "146.50 SR",
+      "currency": "SAR",
+      "discount": 0,
+      "release_date": "13 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "Build a wilder world in Planet Zoo 2. Create distinctive zoos around the globe filled with awe-inspiring animals, including fully aquatic and flying species, before taking your experience beyond the zoo to release your animals into expansive Wildlife Reserves."
+    }
+  },
+  "2": {
+    "appid": 4231820,
+    "name": "Castlevania: Belmont's Curse",
+    "files": {
+      "header": "2_header.jpg",
+      "shot0": "2_shot0.jpg",
+      "shot1": "2_shot1.jpg",
+      "shot2": "2_shot2.jpg"
+    },
+    "meta": {
+      "developers": [
+        "KONAMI",
+        " Evil Empire"
+      ],
+      "publishers": [
+        "KONAMI"
+      ],
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "is_free": false,
+      "price": "109.00 SR",
+      "currency": "SAR",
+      "discount": 0,
+      "release_date": "14 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "Crimson Curse —Will Your Fate Bloom in Despair or Salvation Set 23 years after Castlevania Dracula's Curse - follow Rose Belmont's journey in an all new 2D Action-Exploration title from KONAMI, Evil Empire and Motion Twin."
     }
   }
 }
