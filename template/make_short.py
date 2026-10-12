@@ -48,7 +48,7 @@ def background(t):
 def header(d):
     # channel bar
     d.rounded_rectangle([60, 90, W - 60, 210], 30, fill=(0, 0, 0, 120))
-    d.text((W - 100, 150), "أخبار سكار في دقيقة", font=f(54), fill=WHITE, anchor="rm", direction="rtl")
+    d.text((W - 100, 150), "أخبار سكارفيس في دقيقة", font=f(54), fill=WHITE, anchor="rm", direction="rtl")
     d.rounded_rectangle([90, 120, 270, 180], 20, fill=ACCENT)
     d.text((180, 150), "عاجل", font=f(40), fill=WHITE, anchor="mm", direction="rtl")
 
