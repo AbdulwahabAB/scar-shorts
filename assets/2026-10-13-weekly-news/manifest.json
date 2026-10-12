@@ -1,0 +1,22 @@
+{
+  "0": {
+    "appid": 2828710,
+    "name": "Valor Mortis",
+    "files": {
+      "header": "0_header.jpg",
+      "shot0": "0_shot0.jpg",
+      "shot1": "0_shot1.jpg",
+      "shot2": "0_shot2.jpg"
+    }
+  },
+  "1": {
+    "appid": 4231820,
+    "name": "Castlevania: Belmont's Curse",
+    "files": {
+      "header": "1_header.jpg",
+      "shot0": "1_shot0.jpg",
+      "shot1": "1_shot1.jpg",
+      "shot2": "1_shot2.jpg"
+    }
+  }
+}
