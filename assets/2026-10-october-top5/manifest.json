@@ -30,17 +30,14 @@
       "short_description": "Crimson Curse —Will Your Fate Bloom in Despair or Salvation Set 23 years after Castlevania Dracula's Curse - follow Rose Belmont's journey in an all new 2D Action-Exploration title from KONAMI, Evil Empire and Motion Twin."
     },
     "movie": {
-      "name": "Gameplay & Commentary Trailer",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Gameplay & Commentary Trailer"
+    },
+    "movies": [
+      "Bloody Tears Trailer_EN",
+      "Release Date Trailer_EN",
+      "Announcement Trailer_EN",
+      "Gameplay & Commentary Trailer"
+    ]
   },
   "1": {
     "appid": 2828710,
@@ -74,17 +71,17 @@
       "short_description": "Valor Mortis is a first-person action soulslike from the creators of Ghostrunner. Rise from death as a former soldier of Napoleon’s army. Wield supernatural powers, battle horrifying monsters, and unravel a conspiracy that threatens all of humanity."
     },
     "movie": {
-      "name": "Gameplay Overview Trailer",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Gameplay Overview Trailer"
+    },
+    "movies": [
+      "Valor Mortis Launch Trailer",
+      "Gameplay Overview Trailer",
+      "Valor Mortis - Story Trailer",
+      "Release Date Trailer",
+      "Valor Mortis - Gameplay Trailer",
+      "Valor Mortis - Announce",
+      "Valor Mortis - The Crimson Plague"
+    ]
   },
   "2": {
     "appid": 3259780,
@@ -116,17 +113,12 @@
       "short_description": "Return to the pixel‑art world of FINAL FANTASY, evolved from its classic roots. Travel with companions bound by fate and call on Visions to aid you in battle to uncover the truth behind a force that threatens to bring everything to ruin."
     },
     "movie": {
-      "name": "Demo_Trailer_EN_PEGI",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Demo_Trailer_EN_PEGI"
+    },
+    "movies": [
+      "Demo_Trailer_EN_PEGI",
+      "EN PEGI Announce"
+    ]
   },
   "3": {
     "appid": 4115450,
@@ -158,17 +150,13 @@
       "short_description": "S-GAME presents Phantom Blade Zero, a fusion of classic Wuxia storytelling and exhilarating action powered by Unreal Engine 5. You play as Soul, a warrior with only sixty-six days left to live. Fend off assassins, unravel world-ending conspiracies, and defend your values with your life."
     },
     "movie": {
-      "name": "Phantom Blade Zero - Year of the Snake Gameplay Trailer",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Phantom Blade Zero - Year of the Snake Gameplay Trailer"
+    },
+    "movies": [
+      "Phantom Blade Zero - Pre-Order Trailer",
+      "Phantom Blade Zero - Release Date Announcement Trailer",
+      "Phantom Blade Zero - Year of the Snake Gameplay Trailer"
+    ]
   },
   "4": {
     "appid": 4435490,
@@ -206,16 +194,17 @@
       "short_description": "War erupts on the Korean Peninsula as North Korea launches an invasion that threatens to destabilize the world in Call of Duty®: Modern Warfare® 4."
     },
     "movie": {
-      "name": "DMZ EA",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "DMZ EA"
+    },
+    "movies": [
+      "DMZ EA",
+      "PC Trailer",
+      "Campaign",
+      "Multiplayer",
+      "Reveal",
+      "Campaign Early Access",
+      "DMZ",
+      "Vault"
+    ]
   }
 }

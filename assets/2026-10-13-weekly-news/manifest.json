@@ -31,17 +31,17 @@
       "short_description": "Valor Mortis is a first-person action soulslike from the creators of Ghostrunner. Rise from death as a former soldier of Napoleon’s army. Wield supernatural powers, battle horrifying monsters, and unravel a conspiracy that threatens all of humanity."
     },
     "movie": {
-      "name": "Gameplay Overview Trailer",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Gameplay Overview Trailer"
+    },
+    "movies": [
+      "Valor Mortis Launch Trailer",
+      "Gameplay Overview Trailer",
+      "Valor Mortis - Story Trailer",
+      "Release Date Trailer",
+      "Valor Mortis - Gameplay Trailer",
+      "Valor Mortis - Announce",
+      "Valor Mortis - The Crimson Plague"
+    ]
   },
   "1": {
     "appid": 3219030,
@@ -73,17 +73,17 @@
       "short_description": "Build a wilder world in Planet Zoo 2. Create distinctive zoos around the globe filled with awe-inspiring animals, including fully aquatic and flying species, before taking your experience beyond the zoo to release your animals into expansive Wildlife Reserves."
     },
     "movie": {
-      "name": "Planet Zoo 2 Gameplay Trailer - En",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Planet Zoo 2 Gameplay Trailer - En"
+    },
+    "movies": [
+      "Planet Zoo 2 Gameplay Trailer - En",
+      "Planet Zoo 2 Announce Trailer - En",
+      "Planet Zoo 2 Feature Focus - Wildlife Reserve - En",
+      "Planet Zoo 2 Feature Focus - Zoo Creativity - En",
+      "Planet Zoo 2 Feature Focus - Frequent Flyers - En - ",
+      "Planet Zoo 2 Feature Focus - Awesome Aquatics - En",
+      "Planet Zoo 2 Feature Focus - Awe Inspiring Animals - En"
+    ]
   },
   "2": {
     "appid": 4231820,
@@ -116,16 +116,13 @@
       "short_description": "Crimson Curse —Will Your Fate Bloom in Despair or Salvation Set 23 years after Castlevania Dracula's Curse - follow Rose Belmont's journey in an all new 2D Action-Exploration title from KONAMI, Evil Empire and Motion Twin."
     },
     "movie": {
-      "name": "Gameplay & Commentary Trailer",
-      "keys": [
-        "dash_av1",
-        "dash_h264",
-        "highlight",
-        "hls_h264",
-        "id",
-        "name",
-        "thumbnail"
-      ]
-    }
+      "name": "Gameplay & Commentary Trailer"
+    },
+    "movies": [
+      "Bloody Tears Trailer_EN",
+      "Release Date Trailer_EN",
+      "Announcement Trailer_EN",
+      "Gameplay & Commentary Trailer"
+    ]
   }
 }
