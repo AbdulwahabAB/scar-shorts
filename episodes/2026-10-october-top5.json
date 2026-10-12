@@ -5,14 +5,20 @@
   "intro": {
     "title": "أقوى ٥ ألعاب في أكتوبر",
     "sub": "من ٥ إلى ١",
-    "hook": ["أقوى ٥ ألعاب في أكتوبر", "رتبناها لك من ٥ إلى ١!"]
+    "hook": [
+      "أقوى ٥ ألعاب في أكتوبر",
+      "رتبناها لك من ٥ إلى ١!"
+    ]
   },
   "items": [
     {
       "tag": "الخميس ١٥ أكتوبر",
       "title": "Castlevania: Belmont's Curse",
       "info": "أكشن واستكشاف 2D • من مطوري Dead Cells",
-      "bullets": ["البطلة روز ابنة تريفور بلمونت", "الديمو متوفر وتقدمك ينتقل للعبة"],
+      "bullets": [
+        "البطلة روز ابنة تريفور بلمونت",
+        "الديمو متوفر وتقدمك ينتقل للعبة"
+      ],
       "plat": "PS5 • Xbox • Switch • PC",
       "steam": "Castlevania: Belmont's Curse",
       "shot": "shot2",
@@ -22,7 +28,10 @@
       "tag": "الثلاثاء ١٣ أكتوبر",
       "title": "Valor Mortis",
       "info": "سولز لايك بمنظور أول • One More Level",
-      "bullets": ["من مطوري Ghostrunner", "متوفرة من أول يوم على Game Pass"],
+      "bullets": [
+        "من مطوري Ghostrunner",
+        "متوفرة من أول يوم على Game Pass"
+      ],
       "price": "Game Pass",
       "plat": "PS5 • Xbox • PC",
       "steam": "Valor Mortis",
@@ -33,7 +42,10 @@
       "tag": "الخميس ٢٢ أكتوبر",
       "title": "Final Fantasy Resonance",
       "info": "RPG بنظام أدوار • Square Enix",
-      "bullets": ["أول Final Fantasy بأسلوب HD-2D", "يظهر فيها Cloud و Tidus"],
+      "bullets": [
+        "أول Final Fantasy بأسلوب HD-2D",
+        "يظهر فيها Cloud و Tidus"
+      ],
       "plat": "PS5 • Xbox • Switch 2 • PC",
       "steam": "Final Fantasy Resonance",
       "shot": "shot0",
@@ -43,21 +55,27 @@
       "tag": "الخميس ٢٩ أكتوبر",
       "title": "Phantom Blade Zero",
       "info": "أكشن RPG • S-Game",
-      "bullets": ["قتال كونغ فو سريع وسينمائي", "البطل Soul في عالم ووشيا مظلم"],
+      "bullets": [
+        "قتال كونغ فو سريع وسينمائي",
+        "البطل Soul في عالم ووشيا مظلم"
+      ],
       "plat": "PS5 • PC",
       "steam": "Phantom Blade Zero",
       "shot": "shot0",
-      "clip_start": 20
+      "clip_start": 55
     },
     {
       "tag": "الجمعة ٢٣ أكتوبر",
       "title": "Call of Duty: Modern Warfare 4",
       "info": "شوتر • Infinity Ward",
-      "bullets": ["أول Call of Duty على Switch 2", "رجعة طور DMZ للاستخراج"],
+      "bullets": [
+        "أول Call of Duty على Switch 2",
+        "رجعة طور DMZ للاستخراج"
+      ],
       "plat": "PS5 • Xbox • PC • Switch 2",
       "steam": "Call of Duty: Modern Warfare 4",
       "shot": "shot0",
-      "clip_start": 20
+      "clip_start": 48
     }
   ],
   "outro": {
