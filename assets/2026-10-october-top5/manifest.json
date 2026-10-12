@@ -1,0 +1,221 @@
+{
+  "0": {
+    "appid": 4231820,
+    "name": "Castlevania: Belmont's Curse",
+    "files": {
+      "header": "0_header.jpg",
+      "shot0": "0_shot0.jpg",
+      "shot1": "0_shot1.jpg",
+      "shot2": "0_shot2.jpg",
+      "clip": "0_clip.mp4"
+    },
+    "meta": {
+      "developers": [
+        "KONAMI",
+        " Evil Empire"
+      ],
+      "publishers": [
+        "KONAMI"
+      ],
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "is_free": false,
+      "price": "109.00 SR",
+      "currency": "SAR",
+      "discount": 0,
+      "release_date": "14 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "Crimson Curse —Will Your Fate Bloom in Despair or Salvation Set 23 years after Castlevania Dracula's Curse - follow Rose Belmont's journey in an all new 2D Action-Exploration title from KONAMI, Evil Empire and Motion Twin."
+    },
+    "movie": {
+      "name": "Gameplay & Commentary Trailer",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
+    }
+  },
+  "1": {
+    "appid": 2828710,
+    "name": "Valor Mortis",
+    "files": {
+      "header": "1_header.jpg",
+      "shot0": "1_shot0.jpg",
+      "shot1": "1_shot1.jpg",
+      "shot2": "1_shot2.jpg",
+      "clip": "1_clip.mp4"
+    },
+    "meta": {
+      "developers": [
+        "One More Level"
+      ],
+      "publishers": [
+        "Lyrical Games",
+        "One More Level"
+      ],
+      "genres": [
+        "Action",
+        "Adventure",
+        "RPG"
+      ],
+      "is_free": false,
+      "price": null,
+      "currency": null,
+      "discount": null,
+      "release_date": "13 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "Valor Mortis is a first-person action soulslike from the creators of Ghostrunner. Rise from death as a former soldier of Napoleon’s army. Wield supernatural powers, battle horrifying monsters, and unravel a conspiracy that threatens all of humanity."
+    },
+    "movie": {
+      "name": "Gameplay Overview Trailer",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
+    }
+  },
+  "2": {
+    "appid": 3259780,
+    "name": "FINAL FANTASY RESONANCE",
+    "files": {
+      "header": "2_header.jpg",
+      "shot0": "2_shot0.jpg",
+      "shot1": "2_shot1.jpg",
+      "shot2": "2_shot2.jpg",
+      "clip": "2_clip.mp4"
+    },
+    "meta": {
+      "developers": [
+        "Square Enix",
+        "LANCARSE Ltd."
+      ],
+      "publishers": [
+        "Square Enix"
+      ],
+      "genres": [
+        "RPG"
+      ],
+      "is_free": false,
+      "price": "190.00 SR",
+      "currency": "SAR",
+      "discount": 0,
+      "release_date": "22 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "Return to the pixel‑art world of FINAL FANTASY, evolved from its classic roots. Travel with companions bound by fate and call on Visions to aid you in battle to uncover the truth behind a force that threatens to bring everything to ruin."
+    },
+    "movie": {
+      "name": "Demo_Trailer_EN_PEGI",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
+    }
+  },
+  "3": {
+    "appid": 4115450,
+    "name": "Phantom Blade Zero",
+    "files": {
+      "header": "3_header.jpg",
+      "shot0": "3_shot0.jpg",
+      "shot1": "3_shot1.jpg",
+      "shot2": "3_shot2.jpg",
+      "clip": "3_clip.mp4"
+    },
+    "meta": {
+      "developers": [
+        "S-GAME Studio"
+      ],
+      "publishers": [
+        "S-GAME Publishing"
+      ],
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "is_free": false,
+      "price": "225.00 SR",
+      "currency": "SAR",
+      "discount": 0,
+      "release_date": "28 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "S-GAME presents Phantom Blade Zero, a fusion of classic Wuxia storytelling and exhilarating action powered by Unreal Engine 5. You play as Soul, a warrior with only sixty-six days left to live. Fend off assassins, unravel world-ending conspiracies, and defend your values with your life."
+    },
+    "movie": {
+      "name": "Phantom Blade Zero - Year of the Snake Gameplay Trailer",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
+    }
+  },
+  "4": {
+    "appid": 4435490,
+    "name": "Call of Duty®: Modern Warfare® 4",
+    "files": {
+      "header": "4_header.jpg",
+      "shot0": "4_shot0.jpg",
+      "shot1": "4_shot1.jpg",
+      "shot2": "4_shot2.jpg",
+      "clip": "4_clip.mp4"
+    },
+    "meta": {
+      "developers": [
+        "Infinity Ward",
+        "Beenox",
+        "Digital Legends",
+        "Activision Shanghai",
+        "Raven Software",
+        "Treyarch",
+        "Sledgehammer Games",
+        "High Moon Studios"
+      ],
+      "publishers": [
+        "Activision"
+      ],
+      "genres": [
+        "Action"
+      ],
+      "is_free": false,
+      "price": "299.00 SR",
+      "currency": "SAR",
+      "discount": 0,
+      "release_date": "22 Oct, 2026",
+      "coming_soon": true,
+      "short_description": "War erupts on the Korean Peninsula as North Korea launches an invasion that threatens to destabilize the world in Call of Duty®: Modern Warfare® 4."
+    },
+    "movie": {
+      "name": "DMZ EA",
+      "keys": [
+        "dash_av1",
+        "dash_h264",
+        "highlight",
+        "hls_h264",
+        "id",
+        "name",
+        "thumbnail"
+      ]
+    }
+  }
+}
