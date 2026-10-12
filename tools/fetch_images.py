@@ -89,8 +89,11 @@ def main(ep_path):
             entry["files"][key] = fn
         movies = data.get("movies") or []
         if movies and not it.get("no_clip"):
-            pick = next((m for m in movies if "gameplay" in (m.get("name") or "").lower()), movies[0])
-            entry["movie"] = {"name": pick.get("name"), "keys": sorted(pick.keys())}
+            want = (it.get("movie") or "").lower()
+            pick = (next((m for m in movies if want and want in (m.get("name") or "").lower()), None)
+                    or next((m for m in movies if "gameplay" in (m.get("name") or "").lower()), movies[0]))
+            entry["movie"] = {"name": pick.get("name")}
+            entry["movies"] = [m.get("name") for m in movies]
             url = movie_url(pick)
             if url:
                 try:
