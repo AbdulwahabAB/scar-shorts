@@ -155,8 +155,68 @@ def card_layer(it, num, t):
     d.text((W / 2, cy + 790), it["plat"], font=font(50), fill=GOLD_HI + (a,), anchor="mm")
     return lay
 
+def rounded(img, r):
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, img.width - 1, img.height - 1], r, fill=255)
+    img = img.convert("RGBA"); img.putalpha(m); return img
+
+def cover(img, w, h, zoom=1.0):
+    s = max(w / img.width, h / img.height) * zoom
+    im = img.resize((int(img.width * s) + 1, int(img.height * s) + 1), Image.LANCZOS)
+    x, y = (im.width - w) // 2, (im.height - h) // 2
+    return im.crop((x, y, x + w, y + h))
+
+def load_item_images(ep):
+    mpath = os.path.join(ROOT, "assets", ep["slug"], "manifest.json")
+    if not os.path.exists(mpath): return
+    man = json.load(open(mpath, encoding="utf-8"))
+    for i, it in enumerate(ep["items"]):
+        e = man.get(str(i))
+        if not e: continue
+        fn = e["files"].get(it.get("shot", "shot0"))
+        if not fn: continue
+        shot = Image.open(os.path.join(ROOT, "assets", ep["slug"], fn)).convert("RGB")
+        it["_shot"] = shot
+        bg = cover(shot, W, H, 1.0).filter(ImageFilter.GaussianBlur(28))
+        bg = Image.blend(bg, Image.new("RGB", (W, H), BLACK), 0.55)
+        it["_bg"] = bg
+
+def item_background(it, t, gt):
+    base = background(gt)
+    if "_bg" not in it: return base
+    k = min(ease_out(t / 0.5), 1 - ease_in((t - (ITEM_D - 0.35)) / 0.35))
+    z = 1 + 0.06 * t / ITEM_D
+    bg = cover(it["_bg"], W, H, z).convert("RGBA")
+    return Image.blend(base, bg, max(0.0, min(1.0, k)))
+
+PANEL_W, PANEL_H, PANEL_Y = 960, 540, 330
+def card_layer_img(it, num, t):
+    lay = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
+    z = 1 + 0.07 * t / ITEM_D                         # slow ken-burns inside the panel
+    panel = rounded(cover(it["_shot"], PANEL_W, PANEL_H, z), 34)
+    lay.alpha_composite(panel, ((W - PANEL_W) // 2, PANEL_Y))
+    d.rounded_rectangle([(W - PANEL_W) // 2, PANEL_Y, (W + PANEL_W) // 2, PANEL_Y + PANEL_H], 34,
+                        outline=GOLD + (255,), width=5)
+    d.ellipse([W / 2 - 85, PANEL_Y - 85, W / 2 + 85, PANEL_Y + 85], fill=GOLD + (255,), outline=BLACK + (255,), width=8)
+    d.text((W / 2, PANEL_Y - 4), num, font=font(104), fill=BLACK, anchor="mm")
+    cy = PANEL_Y + PANEL_H + 40
+    d.rounded_rectangle([60, cy, W - 60, cy + 650], 46, fill=(8, 8, 8, 230), outline=GOLD + (255,), width=5)
+    def fade(start): return int(255 * ease_out((t - start) / 0.4))
+    a = fade(0.35)
+    d.rounded_rectangle([W / 2 - 280, cy + 45, W / 2 + 280, cy + 137], 46, fill=GOLD + (a,))
+    d.text((W / 2, cy + 89), it["tag"], font=font(52), fill=BLACK + (a,), anchor="mm", direction="rtl")
+    a = fade(0.6)
+    d.text((W / 2, cy + 240), it["title"], font=font(92), fill=WHITE + (a,), anchor="mm", direction="rtl")
+    d.line([W / 2 - 120, cy + 315, W / 2 + 120, cy + 315], fill=GOLD + (a,), width=4)
+    a = fade(0.9)
+    for i, ln in enumerate(it["body"]):
+        d.text((W / 2, cy + 395 + i * 84), ln, font=font(58, 500), fill=GRAY + (a,), anchor="mm", direction="rtl")
+    a = fade(1.3)
+    d.text((W / 2, cy + 590), it["plat"], font=font(48), fill=GOLD_HI + (a,), anchor="mm")
+    return lay
+
 def scene_item(c, t, it, num):
-    lay = card_layer(it, num, t)
+    lay = card_layer_img(it, num, t) if "_shot" in it else card_layer(it, num, t)
     x = int((1 - ease_out(t / 0.5)) * W)            # slide in from right
     out = ease_in((t - (ITEM_D - 0.35)) / 0.35)      # slide out to left
     x -= int(out * W)
@@ -229,6 +289,7 @@ def synth_audio(ep, total, cuts, path):
 # ---------------------------------------------------------------- render
 def render(ep_path, out_path):
     ep = json.load(open(ep_path, encoding="utf-8"))
+    load_item_images(ep)
     tl = timeline(ep)
     total = sum(d for _, d, _ in tl)
     tmp = tempfile.mkdtemp()
@@ -237,7 +298,7 @@ def render(ep_path, out_path):
         cuts.append(gt)
         for i in range(int(dur * FPS)):
             t = i / FPS
-            c = background(gt + t)
+            c = item_background(data[0], t, gt + t) if kind == "item" else background(gt + t)
             header(c, ep["series"])
             if kind == "intro": scene_intro(c, t, ep)
             elif kind == "item": scene_item(c, t, *data)
